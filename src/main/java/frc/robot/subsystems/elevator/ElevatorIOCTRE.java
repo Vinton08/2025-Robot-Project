@@ -34,9 +34,9 @@ public class ElevatorIOCTRE implements ElevatorIO {
   public static final double GEAR_RATIO = 2.0;
 
   /** The leader TalonFX motor controller (CAN ID: 30) */
-  public final TalonFX leader = new TalonFX(18);
+  public final TalonFX leader = new TalonFX(5);
   /** The follower TalonFX motor controller (CAN ID: 31) */
-  public final TalonFX follower = new TalonFX(19);
+  public final TalonFX follower = new TalonFX(6);
 
   /** The CANcoder for position feedback (CAN ID: 32) */
 

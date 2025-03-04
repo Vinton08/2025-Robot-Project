@@ -19,6 +19,9 @@ import frc.robot.subsystems.drive.requests.SwerveSetpointGen;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOSIM;
+import frc.robot.subsystems.Algae.Algae;
+import frc.robot.subsystems.Algae.AlgaeIO;
+import frc.robot.subsystems.Algae.AlgaeIOSIM;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -55,11 +58,6 @@ public class RobotContainer {
         // Real robot, instantiate hardware IO implementations
         drivetrain = new Drive(currentDriveTrain);
 
-        // new Vision(
-        //     drivetrain::addVisionData,
-        //     new VisionIOLimelight("limelight-f", drivetrain::getVisionParameters));
-
-        // elevator = new Elevator(new ElevatorIOCTRE()); // Disabled to prevent robot movement if
         // deployed to a real robot
         elevator = new Elevator(new ElevatorIO() {});
 
@@ -69,33 +67,6 @@ public class RobotContainer {
         // Sim robot, instantiate physics sim IO implementations
         drivetrain = new Drive(currentDriveTrain);
 
-        // new Vision(
-        //     drivetrain::addVisionData,
-        //     new VisionIOPhotonVisionSIM(
-        //         "Front Camera",
-        //         new Transform3d(
-        //             new Translation3d(0.2, 0.0, 0.8),
-        //             new Rotation3d(0, Math.toRadians(20), Math.toRadians(0))),
-        //         drivetrain::getVisionParameters),
-        //     new VisionIOPhotonVisionSIM(
-        //         "Back Camera",
-        //         new Transform3d(
-        //             new Translation3d(-0.2, 0.0, 0.8),
-        //             new Rotation3d(0, Math.toRadians(20), Math.toRadians(180))),
-        //         drivetrain::getVisionParameters),
-        //     new VisionIOPhotonVisionSIM(
-        //         "Left Camera",
-        //         new Transform3d(
-        //             new Translation3d(0.0, 0.2, 0.8),
-        //             new Rotation3d(0, Math.toRadians(20), Math.toRadians(90))),
-        //         drivetrain::getVisionParameters),
-        //     new VisionIOPhotonVisionSIM(
-        //         "Right Camera",
-        //         new Transform3d(
-        //             new Translation3d(0.0, -0.2, 0.8),
-        //             new Rotation3d(0, Math.toRadians(20), Math.toRadians(-90))),
-        //         drivetrain::getVisionParameters));
-
         elevator = new Elevator(new ElevatorIOSIM());
 
         break;
@@ -103,13 +74,6 @@ public class RobotContainer {
       default:
         // Replayed robot, disable IO implementations
         drivetrain = new Drive(new DriveIO() {});
-
-        // new Vision(
-        //     drivetrain::addVisionData,
-        //     new VisionIO() {},
-        //     new VisionIO() {},
-        //     new VisionIO() {},
-        //     new VisionIO() {});
 
         elevator = new Elevator(new ElevatorIO() {});
         break;
@@ -227,6 +191,7 @@ public class RobotContainer {
     joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     // reset the field-centric heading on left bumper press
+    // joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
     // joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
     joystick.a().onTrue(elevator.L1());
     joystick.b().onTrue(elevator.L2());
