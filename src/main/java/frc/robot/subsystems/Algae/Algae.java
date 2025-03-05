@@ -6,15 +6,17 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Algae {
   private final TalonFX leader = new TalonFX(14); // Leader “Left Algae”
   private final TalonFX follower = new TalonFX(13); // Follower “Right Algae”
 
-  private final double normVolts = 7; // Normal VoltageOut - 7 Volts
-  private final double maxVolts = 12; // Max VoltageOut - 12 Volts (For scoring in net)
+  private final double normVolts = 2; // Normal VoltageOut - 7 Volts
+  private final double maxVolts = 14; // Max VoltageOut - 12 Volts (For scoring in net)
   private final double minVolts = 0.5; // Slow Speed - 0.5 Volts
-  private final double curLimit = 10; // Max Current - 10 Amps
+  private final double curLimit = 3; // Max Current - 10 Amps
 
   private final VoltageOut outputVolts = new VoltageOut(0);
 
@@ -54,5 +56,22 @@ public class Algae {
   public void stopMotors() {
     outputVolts.Output = 0;
     leader.setControl(outputVolts);
+  }
+
+  public Command intakeAlgaeCommand() {
+    return Commands.run(() -> intakeAlgae());
+  }
+
+  public Command stopAlgaeCommand() {
+    return Commands.run(() -> stopMotors());
+  }
+
+  public Command outtakeAlgaeCommand() {
+    return Commands.run(() -> outtakeAlgae());
+  }
+
+  public Command shootAlgaeCommand() {
+
+    return Commands.run(() -> shootAlgae());
   }
 }

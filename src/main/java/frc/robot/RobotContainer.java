@@ -3,29 +3,28 @@ package frc.robot;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Algae.Algae;
+// import frc.robot.subsystems.Algae.*;
+import frc.robot.subsystems.Coral.Coral;
+// import frc.robot.subsystems.vision.Vision;
+// import frc.robot.subsystems.vision.VisionIO;
+// import frc.robot.subsystems.vision.VisionIOLimelight;
+// import frc.robot.subsystems.vision.VisionIOPhotonVisionSIM;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOCTRE;
 import frc.robot.subsystems.drive.requests.ProfiledFieldCentricFacingAngle;
 import frc.robot.subsystems.drive.requests.SwerveSetpointGen;
 import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorIO;
-import frc.robot.subsystems.elevator.ElevatorIOSIM;
-import frc.robot.subsystems.Algae.Algae;
-import frc.robot.subsystems.Algae.AlgaeIO;
-import frc.robot.subsystems.Algae.AlgaeIOSIM;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionIO;
-// import frc.robot.subsystems.vision.VisionIOLimelight;
-// import frc.robot.subsystems.vision.VisionIOPhotonVisionSIM;
 import frc.robot.utils.TunableController;
 import frc.robot.utils.TunableController.TunableControllerType;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -34,6 +33,8 @@ public class RobotContainer {
   private LinearVelocity MaxSpeed = TunerConstants.kSpeedAt12Volts;
   private final TunableController joystick =
       new TunableController(0).withControllerType(TunableControllerType.QUADRATIC);
+  private final TunableController joystickOp =
+      new TunableController(1).withControllerType(TunableControllerType.QUADRATIC);
 
   private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -46,6 +47,8 @@ public class RobotContainer {
           .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
   private final Elevator elevator;
+  private final Coral coral;
+  private final Algae algae;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -57,25 +60,28 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drivetrain = new Drive(currentDriveTrain);
-
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
         // deployed to a real robot
-        elevator = new Elevator(new ElevatorIO() {});
 
         break;
 
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
         drivetrain = new Drive(currentDriveTrain);
-
-        elevator = new Elevator(new ElevatorIOSIM());
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
 
         break;
 
       default:
         // Replayed robot, disable IO implementations
         drivetrain = new Drive(new DriveIO() {});
-
-        elevator = new Elevator(new ElevatorIO() {});
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
         break;
     }
 
@@ -185,16 +191,32 @@ public class RobotContainer {
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
-    joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     // reset the field-centric heading on left bumper press
-    // joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-    // joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-    joystick.a().onTrue(elevator.L1());
-    joystick.b().onTrue(elevator.L2());
+    joystick
+        .back()
+        .onTrue(
+            Commands.runOnce(
+                () -> drivetrain.resetPose(Pose2d.kZero.rotateBy(Rotation2d.k180deg))));
+
+    joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
+    joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
+    joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
+    joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
+    joystickOp.rightBumper().whileTrue(algae.intakeAlgaeCommand());
+    joystickOp.rightBumper().whileFalse(algae.stopAlgaeCommand());
+    joystickOp.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
+    joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
+    joystickOp.pov(0).whileTrue(algae.shootAlgaeCommand());
+    joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
+    joystickOp.y().whileTrue(elevator.elevatorUpCommand());
+    joystickOp.y().whileFalse(elevator.elevatorStopCommand());
+    joystickOp.a().whileTrue(elevator.elevatorDownCommand());
+    joystickOp.a().whileFalse(elevator.elevatorStopCommand());
   }
 
   public Command getAutonomousCommand() {

@@ -3,12 +3,12 @@ package frc.robot.subsystems.Algae;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj.RobotBase;
+
 public class AlgaeIOSIM {
-    
+
   private final TalonFX leader = new TalonFX(14); // Leader “Left Algae”
   private final TalonFX follower = new TalonFX(13); // Follower “Right Algae”
- 
+
   // Simulate current reading (returns a simulated value)
   public double getMotorCurrent() {
     return leader.getSupplyCurrent().getValueAsDouble(); // Fetch current from leader (simulated)
