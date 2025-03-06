@@ -11,7 +11,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class Elevator {
   private final TalonFX leader = new TalonFX(5); // Leader “Left Algae”
   private final TalonFX follower = new TalonFX(6); // Follower “Right Algae”
-  private final DigitalInput limitSwitch = new DigitalInput(0); // Limit Switch DIO 0
+  private final DigitalInput BottomLimit = new DigitalInput(0); // Bottom Limit Switch DIO 0
+  private final DigitalInput TopLimit = new DigitalInput(1); // Top Limit switch DIO 1
 
   private final double normVolts = -12; // Normal VoltageOut - 7 Volts
   private final double maxVolts = 12; // Max VoltageOut - 12 Volts (For scoring in net)
@@ -32,8 +33,14 @@ public class Elevator {
   }
 
   public void ElevatorUp() {
-    boolean isLimitTriggered = !limitSwitch.get(); // Normally closed, so false means pressed
-    System.out.println("Limit Switch State: " + isLimitTriggered);
+    boolean isTopLimitTriggered = !TopLimit.get(); // Normally closed, so false means pressed
+    System.out.println("Limit Switch State: " + isTopLimitTriggered);
+    if (isTopLimitTriggered) {
+      outputVolts.Output = 0;
+      leader.setControl(outputVolts);
+      leader.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+      follower.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+    }
     double current = leader.getSupplyCurrent().getValueAsDouble();
     double targetVoltage = (current < curLimit) ? normVolts : minVolts;
 
@@ -43,11 +50,11 @@ public class Elevator {
   }
 
   public void ElevatorDown() {
-    boolean isLimitTriggered = !limitSwitch.get(); // Normally closed, so false means pressed
+    boolean isBotLimitTriggered = !BottomLimit.get(); // Normally closed, so false means pressed
 
-    System.out.println("Limit Switch State: " + isLimitTriggered);
+    // System.out.println("Limit Switch State: " + isBotLimitTriggered);
 
-    if (isLimitTriggered) { // If the switch is triggered (open), stop the elevator
+    if (isBotLimitTriggered) { // If the switch is triggered (open), stop the elevator
       System.out.println("Limit Switch Triggered! Stopping Elevator.");
 
       outputVolts.Output = 0;
