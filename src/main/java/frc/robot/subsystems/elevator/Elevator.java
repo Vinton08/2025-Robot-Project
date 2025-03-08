@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Elevator {
-  private final TalonFX leader = new TalonFX(5); // Leader Left Algae
-  private final TalonFX follower = new TalonFX(6); // Follower Right Algae
+  private final TalonFX leader = new TalonFX(5); // Leader “Left Algae”
+  private final TalonFX follower = new TalonFX(6); // Follower “Right Algae”
   private final DigitalInput BottomLimit = new DigitalInput(0); // Bottom Limit Switch DIO 0
   private final DigitalInput TopLimit = new DigitalInput(1); // Top Limit switch DIO 1
 
@@ -35,15 +35,11 @@ public class Elevator {
   public void ElevatorUp() {
     boolean isTopLimitTriggered = !TopLimit.get(); // Normally closed, so false means pressed
     System.out.println("Limit Switch State: " + isTopLimitTriggered);
-   if (isTopLimitTriggered) { // If the switch is triggered (open), stop the elevator
-      System.out.println("Limit Switch Triggered! Stopping Elevator.");
-
+    if (isTopLimitTriggered) {
       outputVolts.Output = 0;
       leader.setControl(outputVolts);
       leader.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
       follower.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-
-      return;
     }
     double current = leader.getSupplyCurrent().getValueAsDouble();
     double targetVoltage = (current < curLimit) ? normVolts : minVolts;
@@ -114,26 +110,26 @@ public class Elevator {
   }
 
   public Command moveToSetpoint1Command() {
-    return Commands.run(() -> moveToSetpoint(-10));
+    return Commands.run(() -> moveToSetpoint(1));
   }
 
   // Command to move elevator to setpoint 2
   public Command moveToSetpoint2Command() {
-    return Commands.run(() -> moveToSetpoint(-2));
+    return Commands.run(() -> moveToSetpoint(2));
   }
 
   // Command to move elevator to setpoint 3
   public Command moveToSetpoint3Command() {
-    return Commands.run(() -> moveToSetpoint(-3));
+    return Commands.run(() -> moveToSetpoint(3));
   }
 
   // Command to move elevator to setpoint 4
   public Command moveToSetpoint4Command() {
-    return Commands.run(() -> moveToSetpoint(-4));
+    return Commands.run(() -> moveToSetpoint(4));
   }
 
   // Command to move elevator to setpoint 5
   public Command moveToSetpoint5Command() {
-    return Commands.run(() -> moveToSetpoint(-5));
+    return Commands.run(() -> moveToSetpoint(5));
   }
 }
