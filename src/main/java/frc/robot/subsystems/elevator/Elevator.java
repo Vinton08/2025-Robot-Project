@@ -40,6 +40,7 @@ public class Elevator {
       leader.setControl(outputVolts);
       leader.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
       follower.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+      return;
     }
     double current = leader.getSupplyCurrent().getValueAsDouble();
     double targetVoltage = (current < curLimit) ? normVolts : minVolts;
