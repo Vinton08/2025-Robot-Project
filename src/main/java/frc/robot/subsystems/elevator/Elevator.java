@@ -35,11 +35,14 @@ public class Elevator {
   public void ElevatorUp() {
     boolean isTopLimitTriggered = !TopLimit.get(); // Normally closed, so false means pressed
     System.out.println("Limit Switch State: " + isTopLimitTriggered);
-    if (isTopLimitTriggered) {
+   if (isTopLimitTriggered) { // If the switch is triggered (open), stop the elevator
+      System.out.println("Limit Switch Triggered! Stopping Elevator.");
+
       outputVolts.Output = 0;
       leader.setControl(outputVolts);
       leader.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
       follower.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+
       return;
     }
     double current = leader.getSupplyCurrent().getValueAsDouble();
