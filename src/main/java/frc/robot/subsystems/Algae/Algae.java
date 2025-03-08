@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Algae {
-  private final TalonFX leader = new TalonFX(14); // Leader “Left Algae”
-  private final TalonFX follower = new TalonFX(13); // Follower “Right Algae”
+  private final TalonFX leader = new TalonFX(14); // Leader Left Algae
+  private final TalonFX follower = new TalonFX(13); // Follower Right Algae
 
   private final double normVolts = 2; // Normal VoltageOut - 7 Volts
   private final double maxVolts = 14; // Max VoltageOut - 12 Volts (For scoring in net)

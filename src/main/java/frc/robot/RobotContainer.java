@@ -1,88 +1,105 @@
+// Copyright 2021-2025 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// version 3 as published by the Free Software Foundation or
+// available in the root directory of this project.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
 package frc.robot;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Algae.Algae;
-// import frc.robot.subsystems.Algae.*;
-import frc.robot.subsystems.Coral.Coral;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionIO;
-// import frc.robot.subsystems.vision.VisionIOLimelight;
-// import frc.robot.subsystems.vision.VisionIOPhotonVisionSIM;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.DriveIO;
-import frc.robot.subsystems.drive.DriveIOCTRE;
-import frc.robot.subsystems.drive.requests.ProfiledFieldCentricFacingAngle;
-import frc.robot.subsystems.drive.requests.SwerveSetpointGen;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.utils.TunableController;
-import frc.robot.utils.TunableController.TunableControllerType;
+import frc.robot.subsystems.drive.GyroIO;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import frc.robot.subsystems.Algae.Algae;
+import frc.robot.subsystems.Coral.Coral;
+import frc.robot.subsystems.elevator.Elevator;
 
+/**
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * subsystems, commands, and button mappings) should be declared here.
+ */
 public class RobotContainer {
-  private LinearVelocity MaxSpeed = TunerConstants.kSpeedAt12Volts;
-  private final TunableController joystick =
-      new TunableController(0).withControllerType(TunableControllerType.QUADRATIC);
-  private final TunableController joystickOp =
-      new TunableController(1).withControllerType(TunableControllerType.QUADRATIC);
+  // Subsystems
+  private final Drive drive;
+  private final Algae algae;
+  private final Coral coral;
+    private final Elevator elevator;
 
+  // Controller
+  private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController opController = new CommandXboxController(1);
+  // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  public final Drive drivetrain;
-  // CTRE Default Drive Request
-  private final SwerveRequest.FieldCentric drive =
-      new SwerveRequest.FieldCentric()
-          .withDeadband(MaxSpeed.times(0.1))
-          .withRotationalDeadband(Constants.MaxAngularRate.times(0.1)) // Add a 10% deadband
-          .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
-  private final Elevator elevator;
-  private final Coral coral;
-  private final Algae algae;
-
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
+  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    DriveIOCTRE currentDriveTrain = TunerConstants.createDrivetrain();
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
-        drivetrain = new Drive(currentDriveTrain);
-        coral = new Coral();
-        algae = new Algae();
-        elevator = new Elevator();
-        // deployed to a real robot
-
+        drive =
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
+                coral = new Coral();
+                algae = new Algae();
+                elevator = new Elevator();
         break;
-
+        
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
-        drivetrain = new Drive(currentDriveTrain);
-        coral = new Coral();
-        algae = new Algae();
-        elevator = new Elevator();
-
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIOSim(TunerConstants.FrontLeft),
+                new ModuleIOSim(TunerConstants.FrontRight),
+                new ModuleIOSim(TunerConstants.BackLeft),
+                new ModuleIOSim(TunerConstants.BackRight));
+                coral = new Coral();
+                algae = new Algae();
+                elevator = new Elevator();
         break;
+
 
       default:
         // Replayed robot, disable IO implementations
-        drivetrain = new Drive(new DriveIO() {});
-        coral = new Coral();
-        algae = new Algae();
-        elevator = new Elevator();
+        drive =
+            new Drive(
+                new GyroIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {},
+                new ModuleIO() {});
+                coral = new Coral();
+                algae = new Algae();
+                elevator = new Elevator();
         break;
+
     }
 
     // Set up auto routines
@@ -90,135 +107,83 @@ public class RobotContainer {
 
     // Set up SysId routines
     autoChooser.addOption(
+        "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
+    autoChooser.addOption(
+        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
-        drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Quasistatic Reverse)",
-        drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Forward)", drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
-        "Drive SysId (Dynamic Reverse)", drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "Drive Wheel Radius Characterization",
-        DriveCommands.wheelRadiusCharacterization(drivetrain));
-    configureBindings();
+        "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    // Configure the button bindings
+    configureButtonBindings();
   }
 
-  private void configureBindings() {
-    // Note that X is defined as forward according to WPILib convention,
-    // and Y is defined as to the left according to WPILib convention.
-    drivetrain.setDefaultCommand(
-        // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(
-            () ->
-                drive
-                    .withVelocityX(
-                        MaxSpeed.times(
-                            -joystick
-                                .customLeft()
-                                .getY())) // Drive forward with negative Y (forward)
-                    .withVelocityY(
-                        MaxSpeed.times(
-                            -joystick.customLeft().getX())) // Drive left with negative X (left)
-                    .withRotationalRate(
-                        Constants.MaxAngularRate.times(
-                            -joystick
-                                .customRight()
-                                .getX())))); // Drive counterclockwise with negative X (left)
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   */
+  private void configureButtonBindings() {
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX(),
+            () -> -controller.getRightX()));
 
-    // joystick.a().onTrue(Commands.runOnce(() -> drivetrain.resetPose(Pose2d.kZero)));
-    joystick
+    // Lock to 0° when A button is held
+    controller
+        .a()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> new Rotation2d()));
+
+    // Switch to X pattern when X button is pressed
+    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    opController.leftBumper().whileTrue(coral.intakeCoralCommand());
+    opController.leftTrigger().whileTrue(coral.outtakeCoralCommand());
+    opController.leftBumper().whileFalse(coral.stopCoralCommand());
+    opController.leftTrigger().whileFalse(coral.stopCoralCommand());
+    opController.rightBumper().whileTrue(algae.intakeAlgaeCommand());
+    opController.rightBumper().whileFalse(algae.stopAlgaeCommand());
+    opController.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
+    opController.rightTrigger().whileFalse(algae.stopAlgaeCommand());
+    opController.pov(0).whileTrue(algae.shootAlgaeCommand());
+    opController.pov(0).whileFalse(algae.stopAlgaeCommand());
+    opController.y().whileTrue(elevator.elevatorUpCommand());
+    opController.y().whileFalse(elevator.elevatorStopCommand());
+    opController.a().whileTrue(elevator.elevatorDownCommand());
+    opController.a().whileFalse(elevator.elevatorStopCommand());
+    opController.x().onTrue(elevator.moveToSetpoint1Command());
+    // Reset gyro to 0° when B button is pressed
+    controller
         .b()
-        .whileTrue(
-            drivetrain.applyRequest(
-                () ->
-                    point.withModuleDirection(
-                        new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
-
-    // Custom Swerve Request that use PathPlanner Setpoint Generator. Tuning NEEDED. Instructions
-    // can be found here
-    // https://hemlock5712.github.io/Swerve-Setup/talonfx-swerve-tuning.html
-    SwerveSetpointGen setpointGen =
-        new SwerveSetpointGen(
-                drivetrain.getChassisSpeeds(),
-                drivetrain.getModuleStates(),
-                drivetrain::getRotation)
-            .withDeadband(MaxSpeed.times(0.1))
-            .withRotationalDeadband(Constants.MaxAngularRate.times(0.1))
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    joystick
-        .x()
-        .whileTrue(
-            drivetrain.applyRequest(
-                () ->
-                    setpointGen
-                        .withVelocityX(
-                            MaxSpeed.times(
-                                -joystick.getLeftY())) // Drive forward with negative Y (forward)
-                        .withVelocityY(MaxSpeed.times(-joystick.getLeftX()))
-                        .withRotationalRate(Constants.MaxAngularRate.times(-joystick.getRightX()))
-                        .withOperatorForwardDirection(drivetrain.getOperatorForwardDirection())));
-
-    // Custom Swerve Request that use ProfiledFieldCentricFacingAngle. Allows you to face specific
-    // direction while driving
-    ProfiledFieldCentricFacingAngle driveFacingAngle =
-        new ProfiledFieldCentricFacingAngle(
-                new TrapezoidProfile.Constraints(
-                    Constants.MaxAngularRate.baseUnitMagnitude(),
-                    Constants.MaxAngularRate.div(0.25).baseUnitMagnitude()))
-            .withDeadband(MaxSpeed.times(0.1))
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    // Set PID for ProfiledFieldCentricFacingAngle
-    driveFacingAngle.HeadingController.setPID(7, 0, 0);
-    joystick
-        .y()
-        .whileTrue(
-            drivetrain
-                .runOnce(() -> driveFacingAngle.resetProfile(drivetrain.getRotation()))
-                .andThen(
-                    drivetrain.applyRequest(
-                        () ->
-                            driveFacingAngle
-                                .withVelocityX(
-                                    MaxSpeed.times(
-                                        -joystick
-                                            .getLeftY())) // Drive forward with negative Y (forward)
-                                .withVelocityY(MaxSpeed.times(-joystick.getLeftX()))
-                                .withTargetDirection(
-                                    new Rotation2d(
-                                        -joystick.getRightY(), -joystick.getRightX())))));
-
-    // Run SysId routines when holding back/start and X/Y.
-    // Note that each routine should be run exactly once in a single log.
-    // joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    // joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    // joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    // joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-    // reset the field-centric heading on left bumper press
-    joystick
-        .back()
         .onTrue(
             Commands.runOnce(
-                () -> drivetrain.resetPose(Pose2d.kZero.rotateBy(Rotation2d.k180deg))));
-
-    joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
-    joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
-    joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
-    joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
-    joystickOp.rightBumper().whileTrue(algae.intakeAlgaeCommand());
-    joystickOp.rightBumper().whileFalse(algae.stopAlgaeCommand());
-    joystickOp.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
-    joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
-    joystickOp.pov(0).whileTrue(algae.shootAlgaeCommand());
-    joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
-    joystickOp.y().whileTrue(elevator.elevatorUpCommand());
-    joystickOp.y().whileFalse(elevator.elevatorStopCommand());
-    joystickOp.a().whileTrue(elevator.elevatorDownCommand());
-    joystickOp.a().whileFalse(elevator.elevatorStopCommand());
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
+                    drive)
+                .ignoringDisable(true));
   }
 
+  /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }

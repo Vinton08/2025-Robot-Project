@@ -6,8 +6,8 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 public class AlgaeIO {
-  private final TalonFX leader = new TalonFX(14); // Leader “Left Algae”
-  private final TalonFX follower = new TalonFX(13); // Follower “Right Algae”
+  private final TalonFX leader = new TalonFX(14); // Leader Left Algae
+  private final TalonFX follower = new TalonFX(13); // Follower Right Algae
 
   private final VoltageOut outputVolts = new VoltageOut(0);
 
