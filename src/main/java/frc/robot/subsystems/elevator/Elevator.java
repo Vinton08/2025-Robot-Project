@@ -14,9 +14,9 @@ public class Elevator {
   private final DigitalInput BottomLimit = new DigitalInput(0); // Bottom Limit Switch DIO 0
   private final DigitalInput TopLimit = new DigitalInput(1); // Top Limit switch DIO 1
 
-  private final double normVolts = -12; // Normal VoltageOut - 7 Volts
+  private final double normVolts = -4; // Normal VoltageOut - 7 Volts
   private final double maxVolts = 12; // Max VoltageOut - 12 Volts (For scoring in net)
-  private final double minVolts = 0; // Slow Speed - 0.5 Volts
+  private final double NoVolts = 0; // Slow Speed - 0.5 Volts
   private final double curLimit = 20; // Max Current - 10 Amps
 
   private final VoltageOut outputVolts = new VoltageOut(0);
@@ -34,17 +34,23 @@ public class Elevator {
 
   public void ElevatorUp() {
     boolean isTopLimitTriggered = !TopLimit.get(); // Normally closed, so false means pressed
-    System.out.println("Limit Switch State: " + isTopLimitTriggered);
-    if (isTopLimitTriggered) {
+
+    // System.out.println("Limit Switch State: " + isBotLimitTriggered);
+
+    if (isTopLimitTriggered) { // If the switch is triggered (open), stop the elevator
+      System.out.println("Limit Switch Triggered! Stopping Elevator.");
+
       outputVolts.Output = 0;
       leader.setControl(outputVolts);
       leader.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
       follower.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-    }
-    double current = leader.getSupplyCurrent().getValueAsDouble();
-    double targetVoltage = (current < curLimit) ? normVolts : minVolts;
 
-    // Allow movement up even if the limit switch is triggered
+      return;
+    }
+
+    double current = leader.getSupplyCurrent().getValueAsDouble();
+    double targetVoltage = (current < curLimit) ? normVolts : NoVolts;
+
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);
   }
@@ -66,7 +72,7 @@ public class Elevator {
     }
 
     double current = leader.getSupplyCurrent().getValueAsDouble();
-    double targetVoltage = (current < curLimit) ? -normVolts : -minVolts;
+    double targetVoltage = (current < curLimit) ? -normVolts : -NoVolts;
 
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);
