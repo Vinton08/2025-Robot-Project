@@ -14,6 +14,8 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -24,6 +26,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Algae.Algae;
+import frc.robot.subsystems.Coral.Coral;
+import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -31,9 +36,6 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import frc.robot.subsystems.Algae.Algae;
-import frc.robot.subsystems.Coral.Coral;
-import frc.robot.subsystems.elevator.Elevator;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -44,13 +46,13 @@ import frc.robot.subsystems.elevator.Elevator;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Algae algae;
   private final Coral coral;
-    private final Elevator elevator;
-
+  private final Algae algae;
+  private final Elevator elevator;
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
-    private final CommandXboxController opController = new CommandXboxController(1);
+  private final CommandXboxController joystickOp = new CommandXboxController(1);
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -59,6 +61,9 @@ public class RobotContainer {
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -66,13 +71,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-                coral = new Coral();
-                algae = new Algae();
-                elevator = new Elevator();
         break;
-        
+
       case SIM:
         // Sim robot, instantiate physics sim IO implementations
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
         drive =
             new Drive(
                 new GyroIO() {},
@@ -80,14 +85,13 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-                coral = new Coral();
-                algae = new Algae();
-                elevator = new Elevator();
         break;
-
 
       default:
         // Replayed robot, disable IO implementations
+        coral = new Coral();
+        algae = new Algae();
+        elevator = new Elevator();
         drive =
             new Drive(
                 new GyroIO() {},
@@ -95,16 +99,17 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-                coral = new Coral();
-                algae = new Algae();
-                elevator = new Elevator();
         break;
-
     }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-
+    NamedCommands.registerCommand("IntakeAlg", algae.intakeAlgaeCommand());
+    NamedCommands.registerCommand("ShootAlg", algae.shootAlgaeCommand());
+    NamedCommands.registerCommand("StopAlgae", algae.stopAlgaeCommand());
+    NamedCommands.registerCommand("ElevUp", elevator.elevatorUpCommand());
+    NamedCommands.registerCommand("ElevDown", elevator.elevatorDownCommand());
+    NamedCommands.registerCommand("ElevStop", elevator.elevatorStopCommand());
     // Set up SysId routines
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
@@ -152,21 +157,7 @@ public class RobotContainer {
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    opController.leftBumper().whileTrue(coral.intakeCoralCommand());
-    opController.leftTrigger().whileTrue(coral.outtakeCoralCommand());
-    opController.leftBumper().whileFalse(coral.stopCoralCommand());
-    opController.leftTrigger().whileFalse(coral.stopCoralCommand());
-    opController.rightBumper().whileTrue(algae.intakeAlgaeCommand());
-    opController.rightBumper().whileFalse(algae.stopAlgaeCommand());
-    opController.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
-    opController.rightTrigger().whileFalse(algae.stopAlgaeCommand());
-    opController.pov(0).whileTrue(algae.shootAlgaeCommand());
-    opController.pov(0).whileFalse(algae.stopAlgaeCommand());
-    opController.y().whileTrue(elevator.elevatorUpCommand());
-    opController.y().whileFalse(elevator.elevatorStopCommand());
-    opController.a().whileTrue(elevator.elevatorDownCommand());
-    opController.a().whileFalse(elevator.elevatorStopCommand());
-    opController.x().onTrue(elevator.moveToSetpoint1Command());
+
     // Reset gyro to 0° when B button is pressed
     controller
         .b()
@@ -177,6 +168,20 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
+    joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
+    joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
+    joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
+    joystickOp.rightBumper().whileTrue(algae.intakeAlgaeCommand());
+    joystickOp.rightBumper().whileFalse(algae.stopAlgaeCommand());
+    joystickOp.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
+    joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
+    joystickOp.pov(0).whileTrue(algae.shootAlgaeCommand());
+    joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
+    joystickOp.y().whileTrue(elevator.elevatorUpCommand());
+    joystickOp.y().whileFalse(elevator.elevatorStopCommand());
+    joystickOp.a().whileTrue(elevator.elevatorDownCommand());
+    joystickOp.a().whileFalse(elevator.elevatorStopCommand());
   }
 
   /**
