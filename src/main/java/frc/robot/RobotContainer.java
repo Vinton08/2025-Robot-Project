@@ -15,7 +15,6 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -168,6 +167,11 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
+    controller.pov(45).whileTrue(drive.pointToHeadingCommand(Math.toRadians(120)));
+    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
+    // controller.pov(0).whileTrue(Commands.runOnce(() -> drive.pointToHeadingCommand(60)));
+
     joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
     joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
     joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());

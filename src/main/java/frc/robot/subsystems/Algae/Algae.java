@@ -6,10 +6,18 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.*;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class Algae {
+  private final CommandXboxController opJoystick = new CommandXboxController(1);
+
+  public void setRumble(GenericHID.RumbleType type, double value) {
+    opJoystick.setRumble(type, value);
+  }
+
   private final TalonFX leader = new TalonFX(14); // Leader Left Algae
   private final TalonFX follower = new TalonFX(13); // Follower Right Algae
 
@@ -37,6 +45,7 @@ public class Algae {
 
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
   }
 
   public void outtakeAlgae() {
@@ -44,6 +53,7 @@ public class Algae {
 
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kRightRumble, 0.5);
   }
 
   public void shootAlgae() {
@@ -51,11 +61,13 @@ public class Algae {
 
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kRightRumble, 1);
   }
 
   public void stopMotors() {
     outputVolts.Output = 0;
     leader.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kRightRumble, 0);
   }
 
   public Command intakeAlgaeCommand() {

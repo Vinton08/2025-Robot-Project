@@ -44,6 +44,7 @@ import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -364,5 +365,21 @@ public class Drive extends SubsystemBase {
       new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
       new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
     };
+  }
+  /** Points Robot At Heading */
+  public void pointRobotAtHeading(double heading) {
+    Rotation2d currentHeading = getRotation();
+    double delta = heading - currentHeading.getRadians();
+    ChassisSpeeds speeds = new ChassisSpeeds(0, 0, delta);
+    runVelocity(speeds);
+  }
+
+  public void stopTurn() {
+    ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 0);
+    runVelocity(speeds);
+  }
+
+  public Command pointToHeadingCommand(double heading) {
+    return Commands.run(() -> pointRobotAtHeading(heading)).finallyDo(intertupted -> stopTurn());
   }
 }
