@@ -45,6 +45,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
@@ -57,6 +58,20 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase {
+  private boolean isFieldCentric = true;
+
+  public void toggleDriveMode() {
+    isFieldCentric = !isFieldCentric;
+    if (isFieldCentric) {
+      Logger.recordOutput("Drive/DriveMode", "Field Oriented");
+    } else {
+      Logger.recordOutput("Drive/DriveMode", "Robot Oriented");
+    }
+  }
+
+  public boolean isFieldCentric() {
+    return isFieldCentric;
+  }
   // TunerConstants doesn't include these constants, so they are declared locally
   static final double ODOMETRY_FREQUENCY =
       new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -370,7 +385,8 @@ public class Drive extends SubsystemBase {
   public void pointRobotAtHeading(double heading) {
     Rotation2d currentHeading = getRotation();
     double delta = heading - currentHeading.getRadians();
-    ChassisSpeeds speeds = new ChassisSpeeds(0, 0, delta);
+    double scalingFactor = 5.0; // Adjust this factor to make the response more snappy
+    ChassisSpeeds speeds = new ChassisSpeeds(0, 0, delta * scalingFactor);
     runVelocity(speeds);
   }
 
@@ -381,5 +397,9 @@ public class Drive extends SubsystemBase {
 
   public Command pointToHeadingCommand(double heading) {
     return Commands.run(() -> pointRobotAtHeading(heading)).finallyDo(intertupted -> stopTurn());
+  }
+
+  public Command toggleDrivingCommand() {
+    return new InstantCommand(this::toggleDriveMode);
   }
 }

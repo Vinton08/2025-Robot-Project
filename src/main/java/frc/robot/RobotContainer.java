@@ -167,7 +167,8 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
-    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
+    controller.start().onChange(drive.toggleDrivingCommand());
+    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(30)));
     controller.pov(45).whileTrue(drive.pointToHeadingCommand(Math.toRadians(120)));
     controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
     // controller.pov(0).whileTrue(Commands.runOnce(() -> drive.pointToHeadingCommand(60)));

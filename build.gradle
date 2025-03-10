@@ -63,6 +63,14 @@ wpi.java.debugJni = false
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
 
+repositories {
+    mavenLocal()
+    maven { url 'https://jitpack.io' }
+    if(System.getenv("GITHUB_ACTOR") == null || System.getenv("GITHUB_ACTOR").equals("")) {
+        maven { url 'https://maven-clone.frc5572.org/' }
+    }
+}
+
 // Configuration for AdvantageKit
 task(replayWatch, type: JavaExec) {
     mainClass = "org.littletonrobotics.junction.ReplayWatch"
