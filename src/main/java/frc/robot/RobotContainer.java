@@ -145,14 +145,14 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> new Rotation2d()));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -168,9 +168,12 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     controller.start().onChange(drive.toggleDrivingCommand());
-    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(30)));
-    controller.pov(45).whileTrue(drive.pointToHeadingCommand(Math.toRadians(120)));
-    controller.pov(0).whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
+    controller.povUp().whileTrue(drive.pointToHeadingCommand(Math.toRadians(180)));
+    controller.povUpLeft().whileTrue(drive.pointToHeadingCommand(Math.toRadians(120)));
+    controller.povUpRight().whileTrue(drive.pointToHeadingCommand(Math.toRadians(60)));
+    controller.povDown().whileTrue(drive.pointToHeadingCommand(Math.toRadians(0)));
+    controller.povDownLeft().whileTrue(drive.pointToHeadingCommand(Math.toRadians(-60)));
+    controller.povDownRight().whileTrue(drive.pointToHeadingCommand(Math.toRadians(-120)));
     // controller.pov(0).whileTrue(Commands.runOnce(() -> drive.pointToHeadingCommand(60)));
 
     joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());

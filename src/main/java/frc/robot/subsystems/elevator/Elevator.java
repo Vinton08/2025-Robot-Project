@@ -14,7 +14,7 @@ public class Elevator {
   private final DigitalInput BottomLimit = new DigitalInput(0); // Bottom Limit Switch DIO 0
   private final DigitalInput TopLimit = new DigitalInput(1); // Top Limit switch DIO 1
 
-  private final double normVolts = -12; // Normal VoltageOut - 7 Volts
+  private final double normVolts = -1; // Normal VoltageOut - 7 Volts
   private final double maxVolts = 12; // Max VoltageOut - 12 Volts (For scoring in net)
   private final double minVolts = 0; // Slow Speed - 0.5 Volts
   private final double curLimit = 20; // Max Current - 10 Amps
