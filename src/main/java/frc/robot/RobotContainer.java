@@ -202,9 +202,8 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> drivetrain.resetPose(Pose2d.kZero.rotateBy(Rotation2d.k180deg))));
-    
 
-    //Operator Commands
+    // Operator Commands
     joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
     joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
     joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
