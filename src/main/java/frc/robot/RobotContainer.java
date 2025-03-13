@@ -15,6 +15,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Algae.Algae;
 // import frc.robot.subsystems.Algae.*;
 import frc.robot.subsystems.Coral.Coral;
+import frc.robot.subsystems.Elevator.Elevator;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -24,7 +25,6 @@ import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOCTRE;
 import frc.robot.subsystems.drive.requests.ProfiledFieldCentricFacingAngle;
 import frc.robot.subsystems.drive.requests.SwerveSetpointGen;
-import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.utils.TunableController;
 import frc.robot.utils.TunableController.TunableControllerType;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -202,7 +202,9 @@ public class RobotContainer {
         .onTrue(
             Commands.runOnce(
                 () -> drivetrain.resetPose(Pose2d.kZero.rotateBy(Rotation2d.k180deg))));
+    
 
+    //Operator Commands
     joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
     joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
     joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());

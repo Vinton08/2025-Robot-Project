@@ -5,12 +5,15 @@ package frc.robot.subsystems.Coral;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.*;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class Coral {
   private TalonFX motor = new TalonFX(15);
 
+  private final CommandXboxController opJoystick = new CommandXboxController(1);
   private final double normVolts = 5; // Normal Voltage - 5 Volts
   private final double curLimit = 10; // Max current draw - 10 Amps
 
@@ -27,6 +30,7 @@ public class Coral {
   public void stopMotor() { // Outputs 0 Volts on Motor
     outputVolts.Output = 0;
     motor.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kLeftRumble, 0);
   }
 
   public void intakeCoral() { // Runs motor at 5 Volts until current limit is reached.
@@ -34,6 +38,7 @@ public class Coral {
     if (current < curLimit) {
       outputVolts.Output = normVolts;
       motor.setControl(outputVolts);
+      opJoystick.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
     } else {
       stopMotor();
     }
@@ -42,6 +47,7 @@ public class Coral {
   public void outtakeCoral() { // Runs motor at -5 volts
     outputVolts.Output = -normVolts;
     motor.setControl(outputVolts);
+    opJoystick.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
   }
 
   public Command intakeCoralCommand() {
