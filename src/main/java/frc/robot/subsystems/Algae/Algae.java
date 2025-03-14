@@ -21,8 +21,8 @@ public class Algae {
   private final TalonFX leader = new TalonFX(14); // Leader Left Algae
   private final TalonFX follower = new TalonFX(13); // Follower Right Algae
 
-  private final double normVolts = 2; // Normal VoltageOut - 7 Volts
-  private final double maxVolts = 14; // Max VoltageOut - 12 Volts (For scoring in net)
+  private final double normVolts = 4; // Normal VoltageOut - 4 Volts
+  private final double maxVolts = 14; // Max VoltageOut - 14 Volts (For scoring in net)
   private final double minVolts = 0.5; // Slow Speed - 0.5 Volts
   private final double curLimit = 3; // Max Current - 10 Amps
 
