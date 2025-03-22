@@ -220,6 +220,10 @@ public class RobotContainer {
     joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
     joystickOp.x().whileTrue(wrist.MoveWristCommand(90));
     joystickOp.x().whileFalse(wrist.stopWristCommand());
+    joystickOp.b().whileTrue(wrist.MoveWristCommand(0));
+    joystickOp.b().whileFalse(wrist.stopWristCommand());
+    joystickOp.povLeft().whileTrue(wrist.MoveWristCommand(45));
+    joystickOp.povLeft().whileFalse(wrist.stopWristCommand());
     joystickOp.y().whileTrue(elevator.elevatorUpCommand());
     joystickOp.y().whileFalse(elevator.elevatorStopCommand());
     joystickOp.a().whileTrue(elevator.elevatorDownCommand());

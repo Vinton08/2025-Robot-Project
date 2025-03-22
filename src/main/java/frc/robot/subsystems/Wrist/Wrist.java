@@ -9,25 +9,23 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Wrist {
   // Wrist starts at 0 degrees (stoed) to shoot, intake at coral, ground, and reef
-  private final TalonFX wrist = new TalonFX(17); // Wrist Motor
+  private final TalonFX wrist = new TalonFX(15); // Wrist Motor
 
   private static final double normVolts = 0; // Normal VoltageOut - __ Volts
-  private static final double maxCurrent = 100; // Max Current - 2 Amps
+  private static final double maxCurrent = 40; // Max Current - 2 Amps
   private static final double maxVelocity = 100; // Max Velocity - 100 RPM
 
-  public Wrist() {
-    TalonFXConfiguration config = new TalonFXConfiguration();
-    config.Slot0.kP = 0.2;
-    config.Slot0.kI = 0.0;
-    config.Slot0.kD = 0.1;
-    config.Slot0.kV = 0.5;
-    config.Slot0.kA = 0.3;
-    wrist.getConfigurator().apply(config);
-  }
+  // public Wrist() {
+  //   TalonFXConfiguration config = new TalonFXConfiguration();
+  //   config.Slot0.kP = 1;
+  //   config.Slot0.kI = 0.0;
+  //   config.Slot0.kD = 0.1;
+  //   wrist.getConfigurator().apply(config);
+  // }
 
   public void setWristPosition(double position) {
     if (wrist.getSupplyCurrent().getValueAsDouble() > maxCurrent) {
-      wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Coast);
+      wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
       wrist.setControl(new NeutralOut());
     } else {
       wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
