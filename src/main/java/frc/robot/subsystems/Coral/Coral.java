@@ -11,10 +11,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class Coral {
-  private TalonFX motor = new TalonFX(15);
+  private TalonFX motor = new TalonFX(14);
 
   private final CommandXboxController opJoystick = new CommandXboxController(1);
-  private final double normVolts = 5; // Normal Voltage - 5 Volts
+  private final double normVolts = -5; // Normal Voltage - 5 Volts
   private final double curLimit = 10; // Max current draw - 10 Amps
 
   private final VoltageOut outputVolts = new VoltageOut(0);
