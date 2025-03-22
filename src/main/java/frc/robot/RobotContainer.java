@@ -16,6 +16,7 @@ import frc.robot.subsystems.Algae.Algae;
 // import frc.robot.subsystems.Algae.*;
 import frc.robot.subsystems.Coral.Coral;
 import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Wrist.Wrist;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -49,6 +50,7 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Coral coral;
   private final Algae algae;
+  private final Wrist wrist;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -63,6 +65,7 @@ public class RobotContainer {
         coral = new Coral();
         algae = new Algae();
         elevator = new Elevator();
+        wrist = new Wrist();
         // deployed to a real robot
 
         break;
@@ -73,7 +76,7 @@ public class RobotContainer {
         coral = new Coral();
         algae = new Algae();
         elevator = new Elevator();
-
+        wrist = new Wrist();
         break;
 
       default:
@@ -82,6 +85,7 @@ public class RobotContainer {
         coral = new Coral();
         algae = new Algae();
         elevator = new Elevator();
+        wrist = new Wrist();
         break;
     }
 
@@ -214,6 +218,8 @@ public class RobotContainer {
     joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
     joystickOp.pov(0).whileTrue(algae.shootAlgaeCommand());
     joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
+    joystickOp.x().whileTrue(wrist.MoveWristCommand(90));
+    joystickOp.x().whileFalse(wrist.stopWristCommand());
     joystickOp.y().whileTrue(elevator.elevatorUpCommand());
     joystickOp.y().whileFalse(elevator.elevatorStopCommand());
     joystickOp.a().whileTrue(elevator.elevatorDownCommand());
