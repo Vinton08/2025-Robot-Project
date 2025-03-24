@@ -1,48 +1,68 @@
 package frc.robot.subsystems.Wrist;
 
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.NeutralOut;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Wrist {
-  // Wrist starts at 0 degrees (stoed) to shoot, intake at coral, ground, and reef
-  private final TalonFX wrist = new TalonFX(15); // Wrist Motor
+    private final TalonFX wrist = new TalonFX(17); // Wrist Motor
+    
+    private static final double maxCurrent = 40.0; // Adjust based on real-world current draw
+    private static final double maxVelocity = 50.0; // Max degrees per second
+    private static final double maxAcceleration = 30.0; // Max acceleration in degrees/s²
 
-  private static final double normVolts = 0; // Normal VoltageOut - __ Volts
-  private static final double maxCurrent = 40; // Max Current - 2 Amps
-  private static final double maxVelocity = 100; // Max Velocity - 100 RPM
+    private static final double kP = 0.5; // Adjust for more precise control
+    private static final double kI = 0.0001; // Prevent drift
+    private static final double kD = 0.02; // Reduce overshoot
+    private static final double kF = 0.1; // Feedforward to counter gravity
 
-  // public Wrist() {
-  //   TalonFXConfiguration config = new TalonFXConfiguration();
-  //   config.Slot0.kP = 1;
-  //   config.Slot0.kI = 0.0;
-  //   config.Slot0.kD = 0.1;
-  //   wrist.getConfigurator().apply(config);
-  // }
+    public Wrist() {
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        
+        // Set PIDF Gains
+        config.Slot0.kP = kP;
+        config.Slot0.kI = kI;
+        config.Slot0.kD = kD;
+        config.Slot0.kF = kF;
 
-  public void setWristPosition(double position) {
-    if (wrist.getSupplyCurrent().getValueAsDouble() > maxCurrent) {
-      wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-      wrist.setControl(new NeutralOut());
-    } else {
-      wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-      wrist.setControl(new PositionDutyCycle(position));
+        // Motion constraints
+        config.MotionMagic.MotionMagicCruiseVelocity = maxVelocity;
+        config.MotionMagic.MotionMagicAcceleration = maxAcceleration;
+
+        wrist.getConfigurator().apply(config);
     }
-  }
 
-  public void stopWrist() {
-    wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-    wrist.setControl(new NeutralOut());
-  }
+    // Set wrist position using Motion Magic (position input is now raw encoder ticks)
+    public void setWristPosition(double targetPosition) {
+        if (wrist.getSupplyCurrent().getValueAsDouble() > maxCurrent) {
+            wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Coast);
+            wrist.setControl(new NeutralOut());
+        } else {
+            wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+            wrist.setControl(new MotionMagicDutyCycle(targetPosition)); // Uses encoder ticks directly
+        }
+    }
 
-  public Command MoveWristCommand(double position) {
-    return Commands.run(() -> setWristPosition(position));
-  }
+    // Stop the wrist motor
+    public void stopWrist() {
+        wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
+        wrist.setControl(new NeutralOut());
+    }
 
-  public Command stopWristCommand() {
-    return Commands.run(() -> stopWrist());
-  }
+    // Get wrist position directly from the motor's encoder (no manual conversion)
+    public double getWristPosition() {
+        return wrist.getPosition().getValueAsDouble();
+    }
+
+    // Command to move wrist to a specific position
+    public Command moveWristToPositionCommand(double position) {
+        return Commands.run(() -> setWristPosition(position));
+    }
+
+    // Command to stop the wrist
+    public Command stopWristCommand() {
+        return Commands.run(() -> stopWrist());
+    }
 }
