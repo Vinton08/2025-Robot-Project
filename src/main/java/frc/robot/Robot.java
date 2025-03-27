@@ -25,15 +25,26 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+
+
 
 public class Robot extends LoggedRobot {
+
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
   private static boolean redAlliance;
 
+  private final CommandXboxController opJoystick = new CommandXboxController(1);
+
   public Robot() {
+
+
     Pathfinding.setPathfinder(new LocalADStarAK());
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
@@ -101,7 +112,6 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledInit() {}
-
   @Override
   public void disabledPeriodic() {}
 

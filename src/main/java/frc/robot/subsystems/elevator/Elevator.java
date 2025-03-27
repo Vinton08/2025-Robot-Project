@@ -7,19 +7,24 @@ import com.ctre.phoenix6.hardware.*;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 public class Elevator {
+  private final CommandXboxController opJoystick = new CommandXboxController(1);
+
   private final TalonFX leader = new TalonFX(5); // Leader Left Algae
   private final TalonFX follower = new TalonFX(6); // Follower Right Algae
   private final DigitalInput BottomLimit = new DigitalInput(0); // Bottom Limit Switch DIO 0
   private final DigitalInput TopLimit = new DigitalInput(1); // Top Limit switch DIO 1
 
-  private final double normVolts = -12; // Normal VoltageOut - 7 Volts
+  private final double normVolts = -13; // Normal VoltageOut - 7 Volts
   private final double maxVolts = 12; // Max VoltageOut - 12 Volts (For scoring in net)
   private final double minVolts = 0; // Slow Speed - 0.5 Volts
-  private final double curLimit = 20; // Max Current - 10 Amps
+  private final double curLimit = 100; // Max Current - 10 Amps
 
   private final VoltageOut outputVolts = new VoltageOut(0);
+
+  private final double speed = normVolts * opJoystick.getRightY();
 
   public Elevator() {
     follower.setControl(
@@ -43,7 +48,7 @@ public class Elevator {
       return;
     }
     double current = leader.getSupplyCurrent().getValueAsDouble();
-    double targetVoltage = (current < curLimit) ? normVolts : minVolts;
+    double targetVoltage = normVolts;
 
     // Allow movement up even if the limit switch is triggered
     outputVolts.Output = targetVoltage;
@@ -67,7 +72,7 @@ public class Elevator {
     }
 
     double current = leader.getSupplyCurrent().getValueAsDouble();
-    double targetVoltage = (current < curLimit) ? -normVolts : -minVolts;
+    double targetVoltage = -normVolts;
 
     outputVolts.Output = targetVoltage;
     leader.setControl(outputVolts);

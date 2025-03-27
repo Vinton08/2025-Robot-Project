@@ -3,66 +3,83 @@ package frc.robot.subsystems.Wrist;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+// import com.ctre.phoenix6.signals.\
 
 public class Wrist {
-    private final TalonFX wrist = new TalonFX(17); // Wrist Motor
-    
-    private static final double maxCurrent = 40.0; // Adjust based on real-world current draw
-    private static final double maxVelocity = 50.0; // Max degrees per second
-    private static final double maxAcceleration = 30.0; // Max acceleration in degrees/s²
+  private final TalonFX WristMotor = new TalonFX(15); // Wrist Motor
 
-    private static final double kP = 0.5; // Adjust for more precise control
-    private static final double kI = 0.0001; // Prevent drift
-    private static final double kD = 0.02; // Reduce overshoot
-    private static final double kF = 0.1; // Feedforward to counter gravity
+  private static final double maxCurrent = 200.0; // Max current limit in Amps
+  private static final double maxVelocity = 75; // Max velocity (units/sec)
+  private static final double maxAcceleration = 20; // Max acceleration (units/sec^2)
 
-    public Wrist() {
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        
-        // Set PIDF Gains
-        config.Slot0.kP = kP;
-        config.Slot0.kI = kI;
-        config.Slot0.kD = kD;
-        config.Slot0.kF = kF;
+  // PID Gains
+  private static final double kP = 0.6;
+  private static final double kI = 0.25;
+  private static final double kD = 0.1;
+  private static final double kS = 0.5;
+  private static final double kV = 1; // Velocity feedforward
+  private static final double kG = 0.5; // Acceleration feedforward
 
-        // Motion constraints
-        config.MotionMagic.MotionMagicCruiseVelocity = maxVelocity;
-        config.MotionMagic.MotionMagicAcceleration = maxAcceleration;
+  public Wrist() {
+    TalonFXConfiguration config = new TalonFXConfiguration();
 
-        wrist.getConfigurator().apply(config);
-    }
+    // Configure PID
+    config.Slot0.kP = kP;
+    config.Slot0.kI = kI;
+    config.Slot0.kD = kD;
+    config.Slot0.kV = kV;
+    config.Slot0.kG = kG;
+    config.Slot0.kS = kS;
 
-    // Set wrist position using Motion Magic (position input is now raw encoder ticks)
-    public void setWristPosition(double targetPosition) {
-        if (wrist.getSupplyCurrent().getValueAsDouble() > maxCurrent) {
-            wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Coast);
-            wrist.setControl(new NeutralOut());
-        } else {
-            wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-            wrist.setControl(new MotionMagicDutyCycle(targetPosition)); // Uses encoder ticks directly
-        }
-    }
+    config.MotionMagic.MotionMagicCruiseVelocity = maxVelocity;
+    config.MotionMagic.MotionMagicAcceleration = maxAcceleration;
 
-    // Stop the wrist motor
-    public void stopWrist() {
-        wrist.setNeutralMode(com.ctre.phoenix6.signals.NeutralModeValue.Brake);
-        wrist.setControl(new NeutralOut());
-    }
+    WristMotor.getConfigurator().apply(config);
+  }
 
-    // Get wrist position directly from the motor's encoder (no manual conversion)
-    public double getWristPosition() {
-        return wrist.getPosition().getValueAsDouble();
-    }
+  // Set wrist position
+  public void setWristPosition(double targetPosition) {
+    WristMotor.setNeutralMode(NeutralModeValue.Brake);
+    WristMotor.setControl(new MotionMagicDutyCycle(targetPosition));
+    // if (wrist.getSupplyCurrent().getValueAsDouble() > maxCurrent) {
+    //   wrist.setNeutralMode(NeutralModeValue.Brake);
+    //   wrist.setControl(new NeutralOut());
+    // } else {
+    //   wrist.setNeutralMode(NeutralModeValue.Brake);
+    //   wrist.setControl(new MotionMagicDutyCycle(targetPosition));
 
-    // Command to move wrist to a specific position
-    public Command moveWristToPositionCommand(double position) {
-        return Commands.run(() -> setWristPosition(position));
-    }
+  }
 
-    // Command to stop the wrist
-    public Command stopWristCommand() {
-        return Commands.run(() -> stopWrist());
-    }
+  // Stop the wrist motor
+  public void stopWrist() {
+    WristMotor.stopMotor();
+  }
+
+  // Get wrist position from encoder
+  public double getWristPosition() {
+    return WristMotor.getPosition().getValueAsDouble();
+  }
+
+  // Zero the wrist motor encoder
+  public void zeroWrist() {
+    WristMotor.setPosition(0.0);
+  }
+
+  // Command to move wrist to a specific position
+  public Command MoveWristCommand(double position) {
+    return Commands.run(() -> setWristPosition(position));
+  }
+
+  // Command to stop the wrist
+  public Command stopWristCommand() {
+    return Commands.run(() -> stopWrist());
+  }
+
+  // Command to zero the wrist encoder
+  public Command zeroWristCommand() {
+    return Commands.runOnce(() -> zeroWrist());
+  }
 }

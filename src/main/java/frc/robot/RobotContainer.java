@@ -208,26 +208,44 @@ public class RobotContainer {
                 () -> drivetrain.resetPose(Pose2d.kZero.rotateBy(Rotation2d.k180deg))));
 
     // Operator Commands
-    joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
-    joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
-    joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
-    joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
-    joystickOp.rightBumper().whileTrue(algae.intakeAlgaeCommand());
-    joystickOp.rightBumper().whileFalse(algae.stopAlgaeCommand());
-    joystickOp.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
-    joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
-    joystickOp.pov(0).whileTrue(algae.shootAlgaeCommand());
-    joystickOp.pov(0).whileFalse(algae.stopAlgaeCommand());
-    joystickOp.x().whileTrue(wrist.MoveWristCommand(90));
-    joystickOp.x().whileFalse(wrist.stopWristCommand());
-    joystickOp.b().whileTrue(wrist.MoveWristCommand(0));
-    joystickOp.b().whileFalse(wrist.stopWristCommand());
-    joystickOp.povLeft().whileTrue(wrist.MoveWristCommand(45));
-    joystickOp.povLeft().whileFalse(wrist.stopWristCommand());
+
     joystickOp.y().whileTrue(elevator.elevatorUpCommand());
     joystickOp.y().whileFalse(elevator.elevatorStopCommand());
+
     joystickOp.a().whileTrue(elevator.elevatorDownCommand());
     joystickOp.a().whileFalse(elevator.elevatorStopCommand());
+
+    // Algae Commands
+    joystickOp.rightBumper().whileTrue(algae.intakeAlgaeCommand());
+    joystickOp.rightBumper().whileFalse(algae.stopAlgaeCommand());
+
+    joystickOp.rightTrigger().whileTrue(algae.outtakeAlgaeCommand());
+    joystickOp.rightTrigger().whileFalse(algae.stopAlgaeCommand());
+
+    joystickOp.b().whileTrue(algae.shootAlgaeCommand());
+    joystickOp.b().whileFalse(algae.stopAlgaeCommand());
+
+    // Coral Commands
+    joystickOp.leftBumper().whileTrue(coral.intakeCoralCommand());
+    joystickOp.leftBumper().whileFalse(coral.stopCoralCommand());
+
+    joystickOp.leftTrigger().whileTrue(coral.outtakeCoralCommand());
+    joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
+
+    // Wrist Commands
+    joystickOp.povUp().whileTrue(wrist.MoveWristCommand(0));
+    joystickOp.povUp().whileFalse(wrist.stopWristCommand());
+
+    joystickOp.povUpRight().whileTrue(wrist.MoveWristCommand(2));
+    joystickOp.povUpRight().whileFalse(wrist.stopWristCommand());
+
+    joystickOp.povRight().whileTrue(wrist.MoveWristCommand(25));
+    joystickOp.povRight().whileFalse(wrist.stopWristCommand());
+
+    joystickOp.povDown().whileTrue(wrist.MoveWristCommand(33));
+    joystickOp.povDown().whileFalse(wrist.stopWristCommand());
+
+    joystickOp.start().onTrue(wrist.zeroWristCommand());
   }
 
   public Command getAutonomousCommand() {
