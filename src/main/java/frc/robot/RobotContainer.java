@@ -16,11 +16,12 @@ import frc.robot.subsystems.Algae.Algae;
 // import frc.robot.subsystems.Algae.*;
 import frc.robot.subsystems.Coral.Coral;
 import frc.robot.subsystems.Elevator.Elevator;
-import frc.robot.subsystems.Wrist.Wrist;
+import frc.robot.subsystems.Wrist.BetterWrist;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionIO;
 // import frc.robot.subsystems.vision.VisionIOLimelight;
 // import frc.robot.subsystems.vision.VisionIOPhotonVisionSIM;
+import frc.robot.subsystems.Wrist.Wrist;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOCTRE;
@@ -51,6 +52,7 @@ public class RobotContainer {
   private final Coral coral;
   private final Algae algae;
   private final Wrist wrist;
+  private final BetterWrist newWrist;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -66,6 +68,7 @@ public class RobotContainer {
         algae = new Algae();
         elevator = new Elevator();
         wrist = new Wrist();
+        newWrist = new BetterWrist();
         // deployed to a real robot
 
         break;
@@ -77,6 +80,7 @@ public class RobotContainer {
         algae = new Algae();
         elevator = new Elevator();
         wrist = new Wrist();
+        newWrist = new BetterWrist();
         break;
 
       default:
@@ -86,6 +90,7 @@ public class RobotContainer {
         algae = new Algae();
         elevator = new Elevator();
         wrist = new Wrist();
+        newWrist = new BetterWrist();
         break;
     }
 
@@ -233,19 +238,26 @@ public class RobotContainer {
     joystickOp.leftTrigger().whileFalse(coral.stopCoralCommand());
 
     // Wrist Commands
-    joystickOp.povUp().whileTrue(wrist.MoveWristCommand(0));
-    joystickOp.povUp().whileFalse(wrist.stopWristCommand());
 
-    joystickOp.povUpRight().whileTrue(wrist.MoveWristCommand(2));
-    joystickOp.povUpRight().whileFalse(wrist.stopWristCommand());
+    joystickOp.povUp().whileTrue(newWrist.newWristUpCommand());
+    joystickOp.povUp().whileFalse(newWrist.holdNewWristCommand());
 
-    joystickOp.povRight().whileTrue(wrist.MoveWristCommand(25));
-    joystickOp.povRight().whileFalse(wrist.stopWristCommand());
+    joystickOp.povDown().whileTrue(newWrist.newWristDownCommand());
+    joystickOp.povDown().whileFalse(newWrist.holdNewWristCommand());
 
-    joystickOp.povDown().whileTrue(wrist.MoveWristCommand(33));
-    joystickOp.povDown().whileFalse(wrist.stopWristCommand());
+    // joystickOp.povUp().whileTrue(wrist.MoveWristCommand(0));
+    // joystickOp.povUp().whileFalse(wrist.stopWristCommand());
 
-    joystickOp.start().onTrue(wrist.zeroWristCommand());
+    // joystickOp.povUpRight().whileTrue(wrist.MoveWristCommand(2));
+    // joystickOp.povUpRight().whileFalse(wrist.stopWristCommand());
+
+    // joystickOp.povRight().whileTrue(wrist.MoveWristCommand(25));
+    // joystickOp.povRight().whileFalse(wrist.stopWristCommand());
+
+    // joystickOp.povDown().whileTrue(wrist.MoveWristCommand(33));
+    // joystickOp.povDown().whileFalse(wrist.stopWristCommand());
+
+    // joystickOp.start().onTrue(wrist.zeroWristCommand());
   }
 
   public Command getAutonomousCommand() {

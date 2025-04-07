@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.utils.LocalADStarAK;
 import java.util.Optional;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -25,12 +26,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-
-
 
 public class Robot extends LoggedRobot {
 
@@ -44,7 +39,6 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
 
-
     Pathfinding.setPathfinder(new LocalADStarAK());
     // Set up data receivers & replay source
     switch (Constants.currentMode) {
@@ -52,12 +46,14 @@ public class Robot extends LoggedRobot {
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
+
         break;
 
       case SIM:
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
+
         break;
 
       case REPLAY:
@@ -66,6 +62,7 @@ public class Robot extends LoggedRobot {
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+
         break;
     }
 
@@ -112,6 +109,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void disabledInit() {}
+
   @Override
   public void disabledPeriodic() {}
 

@@ -15,6 +15,7 @@ public class Coral {
 
   private final CommandXboxController opJoystick = new CommandXboxController(1);
   private final double normVolts = -5; // Normal Voltage - 5 Volts
+  private final double outVolts = 2;
   private final double curLimit = 10; // Max current draw - 10 Amps
 
   private final VoltageOut outputVolts = new VoltageOut(0);
@@ -45,7 +46,7 @@ public class Coral {
   }
 
   public void outtakeCoral() { // Runs motor at -5 volts
-    outputVolts.Output = -normVolts;
+    outputVolts.Output = outVolts;
     motor.setControl(outputVolts);
     opJoystick.setRumble(GenericHID.RumbleType.kLeftRumble, 0.5);
   }
